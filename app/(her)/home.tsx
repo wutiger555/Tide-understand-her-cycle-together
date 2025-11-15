@@ -1,0 +1,155 @@
+/**
+ * Her Home Screen
+ * Her 的主畫面
+ */
+
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCycleStore } from '@stores';
+import { theme } from '@theme';
+import { getTodayCycleInfo, getPhaseInfo, getDailyMessageForHer } from '@utils';
+
+export default function HerHomeScreen() {
+  const periods = useCycleStore((state) => state.periods);
+  const currentPeriod = useCycleStore((state) => state.currentPeriod);
+
+  // 計算今天的週期資訊
+  const todayCycleInfo = getTodayCycleInfo(periods);
+  const phaseInfo = todayCycleInfo ? getPhaseInfo(todayCycleInfo.phase) : null;
+  const dailyMessage = todayCycleInfo
+    ? getDailyMessageForHer(todayCycleInfo.cycleDay, todayCycleInfo.phase)
+    : 'Welcome to Tide';
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Hello 👋</Text>
+          <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+        </View>
+
+        {/* Today's Status Card */}
+        {todayCycleInfo && phaseInfo ? (
+          <View style={[styles.statusCard, { borderLeftColor: theme.colors.phases.menstrual.primary }]}>
+            <Text style={styles.statusEmoji}>{phaseInfo.emoji}</Text>
+            <Text style={styles.statusMessage}>{dailyMessage}</Text>
+            <Text style={styles.phaseDescription}>{phaseInfo.description}</Text>
+          </View>
+        ) : (
+          <View style={styles.statusCard}>
+            <Text style={styles.statusMessage}>Welcome to Tide</Text>
+            <Text style={styles.phaseDescription}>
+              Log your first period to get started with tracking your cycle.
+            </Text>
+          </View>
+        )}
+
+        {/* Quick Log Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>How are you feeling today?</Text>
+          {/* TODO: 添加快速記錄 UI */}
+          <Text style={styles.placeholder}>Quick log UI will go here</Text>
+        </View>
+
+        {/* Cycle Overview */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Your Cycle</Text>
+          {/* TODO: 添加週期視覺化 */}
+          <Text style={styles.placeholder}>Cycle visualization will go here</Text>
+        </View>
+
+        {/* Self-Care Tips */}
+        {phaseInfo && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Self-Care Tips</Text>
+            {phaseInfo.selfCareTips.slice(0, 3).map((tip, index) => (
+              <View key={index} style={styles.tipItem}>
+                <Text style={styles.tipBullet}>•</Text>
+                <Text style={styles.tipText}>{tip}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background.primary,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  content: {
+    padding: theme.padding.screen,
+  },
+  header: {
+    marginBottom: theme.spacing.lg,
+  },
+  greeting: {
+    ...theme.typography.styles.h2,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.xs,
+  },
+  date: {
+    ...theme.typography.styles.body2,
+    color: theme.colors.text.secondary,
+  },
+  statusCard: {
+    backgroundColor: theme.colors.background.tertiary,
+    borderRadius: theme.radius.lg,
+    padding: theme.padding.card,
+    marginBottom: theme.spacing.lg,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.phases.menstrual.primary,
+    ...theme.shadows.md,
+  },
+  statusEmoji: {
+    fontSize: 40,
+    marginBottom: theme.spacing.sm,
+  },
+  statusMessage: {
+    ...theme.typography.styles.h4,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.sm,
+  },
+  phaseDescription: {
+    ...theme.typography.styles.body2,
+    color: theme.colors.text.secondary,
+  },
+  section: {
+    marginBottom: theme.spacing.xl,
+  },
+  sectionTitle: {
+    ...theme.typography.styles.h4,
+    color: theme.colors.text.primary,
+    marginBottom: theme.spacing.md,
+  },
+  placeholder: {
+    ...theme.typography.styles.body2,
+    color: theme.colors.text.tertiary,
+    fontStyle: 'italic',
+    padding: theme.spacing.lg,
+    backgroundColor: theme.colors.background.tertiary,
+    borderRadius: theme.radius.md,
+    textAlign: 'center',
+  },
+  tipItem: {
+    flexDirection: 'row',
+    marginBottom: theme.spacing.sm,
+  },
+  tipBullet: {
+    ...theme.typography.styles.body1,
+    color: theme.colors.phases.menstrual.primary,
+    marginRight: theme.spacing.sm,
+  },
+  tipText: {
+    ...theme.typography.styles.body2,
+    color: theme.colors.text.secondary,
+    flex: 1,
+  },
+});
